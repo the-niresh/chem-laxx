@@ -45,6 +45,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const threadId = params?.threadId as Id<'threads'> | undefined;
   const user = useQuery(api.users.getCurrentUser);
   const thread = useQuery(api.threads.get, threadId ? { id: threadId } : "skip");
+  const threadTitle =
+    !threadId || !thread?.title || thread.title === "New Conversation"
+      ? "New"
+      : thread.title;
   
   const [input, setInput] = useState("");
   const [webSearch, setWebSearch] = useState(false);
@@ -134,7 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <DashBoardSidebar externalUser={user ?? undefined} />
+      <DashBoardSidebar externalUser={user ?? undefined} activeThreadId={threadId} />
       <SidebarInset className="h-screen overflow-hidden flex flex-col">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
@@ -164,7 +168,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <BreadcrumbSeparator className="hidden md:block" />
                       <BreadcrumbItem>
                         <BreadcrumbPage>
-                          Chattt
+                          {threadTitle}
                         </BreadcrumbPage>
                       </BreadcrumbItem>
                     </>

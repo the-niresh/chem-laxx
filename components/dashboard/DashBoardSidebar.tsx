@@ -2,10 +2,9 @@
 
 import * as React from "react"
 import { Frame, Map, PieChart } from "lucide-react"
-import { NavMain } from "@/components/dashboard/ui/nav-main";
+// import { NavMain } from "@/components/dashboard/ui/nav-main";
 import { NavHistories } from "@/components/dashboard/ui/nav-histories";
 import { NavUser } from "@/components/dashboard/ui/nav-user";
-// import { AgentSwitcher } from "@/components/dashboard/ui/agent-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +32,7 @@ export interface DashBoardSidebarProps extends React.ComponentProps<typeof Sideb
     email?: string | null;
     avatar_url?: string | null;
   };
+  activeThreadId?: Id<"threads">;
 }
 
 // Sidebar Skeleton Component
@@ -91,8 +91,14 @@ function SidebarSkeleton() {
   );
 }
 
-export function DashBoardSidebar({ externalUserAgents, externalUser, ...props }: DashBoardSidebarProps) {
+export function DashBoardSidebar({
+  externalUserAgents,
+  externalUser,
+  activeThreadId,
+  ...props
+}: DashBoardSidebarProps) {
   void externalUserAgents;
+  const activeUrl = activeThreadId ? `/chat/${activeThreadId}` : undefined;
   // Only fetch local data if external props are not provided
   const localUser = useQuery(api.users.getCurrentUser, externalUser ? "skip" : undefined);
   
@@ -123,7 +129,7 @@ export function DashBoardSidebar({ externalUserAgents, externalUser, ...props }:
     const threadIcons = [Frame, PieChart, Map] as const;
     
     return userThreads.map((thread) => ({
-      name: `${thread.title || "Untitled"} (${thread.messages?.length || 0})`,
+      name: `${thread.title || "Untitled"}`,
       url: `/chat/${thread._id}`,
       icon: (() => {
         const id = String(thread._id);
@@ -150,7 +156,7 @@ export function DashBoardSidebar({ externalUserAgents, externalUser, ...props }:
       </SidebarHeader>
       <SidebarContent>
        
-        <NavHistories histories={histories} />
+        <NavHistories histories={histories} activeUrl={activeUrl} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser

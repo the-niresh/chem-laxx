@@ -1,11 +1,11 @@
 "use client";
 
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Loader } from "@/components/ai-elements/loader";
-import { CopyIcon } from "lucide-react";
+import { Check, CopyIcon } from "lucide-react";
 import {
   Conversation,
   ConversationContent,
@@ -36,6 +36,26 @@ export default function ConversationComponent({
   onStreamingComplete,
   scrollToBottom
 }: ConversationComponentProps) {
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
+
+  const copyAssistantMessage = async (text: string) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+      return
+    }
+
+    const textarea = document.createElement("textarea")
+    textarea.value = text
+    textarea.style.position = "fixed"
+    textarea.style.left = "-9999px"
+    textarea.style.top = "-9999px"
+    document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.select()
+    document.execCommand("copy")
+    document.body.removeChild(textarea)
+  }
+
   // Query messages for the thread
   const messages = useQuery(
     api.messages.listMessages, 
@@ -84,10 +104,18 @@ export default function ConversationComponent({
                 {message.role === "assistant" && (
                     <Actions className="mt-2">
                       <Action
-                        onClick={() => navigator.clipboard.writeText(message.text)}
+                        onClick={async () => {
+                          await copyAssistantMessage(message.text)
+                          setCopiedMessageId(message._id)
+                          window.setTimeout(() => setCopiedMessageId(null), 1200)
+                        }}
                         label="Copy"
                       >
-                        <CopyIcon className="size-3" />
+                        {copiedMessageId === message._id ? (
+                          <Check className="size-3 text-green-500 animate-in zoom-in-95 duration-200" />
+                        ) : (
+                          <CopyIcon className="size-3" />
+                        )}
                       </Action>
                     </Actions>
                   )}

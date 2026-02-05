@@ -20,17 +20,17 @@ export function useThreadMetadata(threadId?: Id<"threads">) {
 
   useEffect(() => {
     // On mount (client-only): Capture current title as previous
-    previousTitleRef.current = document.title || "AutoNerds AI";
+    previousTitleRef.current = document.title || "Chem-Laxx";
   }, []);
 
   const title =
     isThreadRoute && thread
-      ? `${thread?.title || "Thread Not Found"} | AutoNerds AI`
-      : "AutoNerds AI";
+      ? `${thread?.title || "Thread Not Found"} | Chem-Laxx`
+      : "Chem-Laxx";
 
   useEffect(() => {
     if (!isThreadRoute || !thread) {
-      const fallbackTitle = previousTitleRef.current || "AutoNerds AI";
+      const fallbackTitle = previousTitleRef.current || "Chem-Laxx";
       document.title = fallbackTitle;
       return;
     }

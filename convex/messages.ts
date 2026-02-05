@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { streamingComponent } from "./streaming";
+import { api } from "./_generated/api";
 
 export const listMessages = query({
   args: { thread_id: v.optional(v.id("threads")) },
@@ -82,6 +83,15 @@ export const sendMessage = mutation({
       await ctx.db.patch(threadId, {
         messages: [...updatedThread.messages, assistantId],
       });
+    }
+
+    // Get the thread to check if it already has a meaningful title
+    if (thread && (thread.title === "New Conversation" || !thread.title)) {
+      // Set a temporary title immediately based on first message
+      await ctx.db.patch(threadId, { title: `Chat about ${args.text.slice(0, 30)}...` });
+      
+      // Schedule title generation only for new conversations
+      await ctx.scheduler.runAfter(0, api.threads.generateThreadTitle, { text: args.text, threadId: threadId });
     }
 
     return { assistantId, threadId };

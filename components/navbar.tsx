@@ -40,7 +40,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         {/* Brand */}
         <Link href="/" className="font-bold text-lg">
-          FoodSpector
+          Chem-Laxx
         </Link>
 
         {/* Desktop Navigation */}
