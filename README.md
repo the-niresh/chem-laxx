@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chemical Industry AI Decision Engine
 
-## Getting Started
+![Chemical Engine](https://grainy-gradients.vercel.app/noise.svg)
 
-First, run the development server:
+An enterprise-grade, highly-specialized AI decision support system designed specifically for chemical manufacturing, formulation engineers, and technical sales. 
 
+Powered by **Next.js**, **Convex** (for real-time multiplayer synchronization and auth), and **OpenAI**. 
+
+## Core Features
+- **Context-Aware Decision Support:** Recommends chemical solutions based on performance, pricing, safety constraints, and client requirements.
+- **Persistent Conversational Threads:** Auto-titled, resumable chat threads using `@convex-dev/persistent-text-streaming`.
+- **Zero-Latency Real-Time Sync:** WebSockets-first streaming architecture.
+- **Isolated Multi-Tenant Security:** Strict role-based isolation via Convex Auth; your queries and IP remain siloed.
+
+## Tech Stack
+- **Frontend:** Next.js 14, React, Tailwind CSS, Shadcn UI, Framer Motion
+- **Backend & Database:** Convex (Serverless, Real-time Database + Auth)
+- **AI Models:** OpenAI API (`gpt-3.5-turbo` or GPT-4, configurable)
+
+## Setup & Local Development
+
+1. **Clone the repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/the-niresh/chem-laxx.git
+cd chem-laxx
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Install dependencies**
+```bash
+npm install
+# or bun install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Setup Environment Variables**
+Copy `.env.example` to `.env.local` and populate your secrets:
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Initialize Convex Backend**
+```bash
+npx convex dev
+```
+This will set up your Convex project and run the serverless backend.
 
-## Learn More
+5. **Start the Next.js Client**
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Security Notice
+This template implements strict server-side authentication (`getAuthUserId`) on all mutations and actions to protect against IDOR. Always ensure API keys like `OPENAI_API_KEY` are kept only in your Convex secrets dashboard.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Built by [the-niresh](https://github.com/the-niresh).*
