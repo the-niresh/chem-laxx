@@ -2,9 +2,10 @@ import { OpenAI } from "openai";
 import { internal } from "./_generated/api";
 import { action, internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Ensure this is set as a Convex secret
+  apiKey: process.env.OPENAI_API_KEY, 
 });
 
 export const createThread = mutation({
@@ -12,6 +13,9 @@ export const createThread = mutation({
     user_id: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId || userId !== args.user_id) throw new Error("Unauthorized");
+
     const threadId = await ctx.db.insert("threads", {
       userId: args.user_id,
       title: "New Conversation",
@@ -31,9 +35,12 @@ export const checkThreadExists = query({
   },
   returns: v.boolean(),
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return false;
+
     try {
       const thread = await ctx.db.get(args.thread_id);
-      return thread !== null;
+      return thread !== null && thread.userId === userId;
     } catch (error) {
       console.error("Error checking if thread exists:", error);
       return false;
@@ -44,7 +51,12 @@ export const checkThreadExists = query({
 export const get = query({
   args: { id: v.id("threads") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const thread = await ctx.db.get(args.id);
+    if (!thread || thread.userId !== userId) throw new Error("Unauthorized");
+    return thread;
   },
 });
 
@@ -53,6 +65,9 @@ export const listThreadsByUser = query({
     user_id: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId || userId !== args.user_id) throw new Error("Unauthorized");
+
     return await ctx.db
       .query("threads")
       .withIndex("by_user_id", (q) => q.eq("userId", args.user_id))
@@ -61,15 +76,15 @@ export const listThreadsByUser = query({
   },
 });
 
-
 export const generateThreadTitle = action({
   args: { text: v.string(), threadId: v.id("threads") },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
     try {
-      // Get the first message to use as context for title generation
       const firstMessage = args.text;
       
-      // Generate a title using OpenAI
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [
@@ -85,13 +100,11 @@ export const generateThreadTitle = action({
         max_tokens: 20,
       });
       
-      // Extract the title from the response
       const content = response.choices[0]?.message?.content;
       const title = content ? content.trim().slice(0, 50) : "Untitled Conversation";
       
       console.log("Generated title for thread", args.threadId, ":", title);
       
-      // Update the thread with the generated title
       await ctx.runMutation(internal.threads.updateThreadTitle, {
         threadId: args.threadId,
         title: title
@@ -101,7 +114,6 @@ export const generateThreadTitle = action({
     } catch (error) {
       console.error("Error generating title for thread", args.threadId, ":", error);
       
-      // Update with default title in case of error
       await ctx.runMutation(internal.threads.updateThreadTitle, {
         threadId: args.threadId,
         title: "Untitled Conversation"
@@ -129,6 +141,12 @@ export const renameThreadTitle = mutation({
     title: v.string(),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const thread = await ctx.db.get(args.threadId);
+    if (!thread || thread.userId !== userId) throw new Error("Unauthorized");
+
     await ctx.db.patch(args.threadId, {
       title: args.title,
       updated_at: Date.now(),
@@ -140,6 +158,12 @@ export const renameThreadTitle = mutation({
 export const deleteThread = mutation({
   args: { threadId: v.id("threads") },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const thread = await ctx.db.get(args.threadId);
+    if (!thread || thread.userId !== userId) throw new Error("Unauthorized");
+
     await ctx.db.delete(args.threadId);
     return null;
   },

@@ -3,7 +3,6 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![Convex](https://img.shields.io/badge/Backend-Convex-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)
-![UI](https://img.shields.io/badge/UI-Tailwind%20%2B%20shadcn%2Fui-0ea5e9)
 ![LLM](https://img.shields.io/badge/LLM-OpenAI-111827)
 
 ## Overview
@@ -132,6 +131,22 @@ This approach makes the system suitable for production usage in regulated/high-r
 
 ## Brief Setup (Development)
 
+Powered by **Next.js**, **Convex** (for real-time multiplayer synchronization and auth), and **OpenAI**. 
+
+## Core Features
+- **Context-Aware Decision Support:** Recommends chemical solutions based on performance, pricing, safety constraints, and client requirements.
+- **Persistent Conversational Threads:** Auto-titled, resumable chat threads using `@convex-dev/persistent-text-streaming`.
+- **Zero-Latency Real-Time Sync:** WebSockets-first streaming architecture.
+- **Isolated Multi-Tenant Security:** Strict role-based isolation via Convex Auth; your queries and IP remain siloed.
+
+## Tech Stack
+- **Frontend:** Next.js 14, React, Tailwind CSS, Shadcn UI, Framer Motion
+- **Backend & Database:** Convex (Serverless, Real-time Database + Auth)
+- **AI Models:** OpenAI API (`gpt-3.5-turbo` or GPT-4, configurable)
+
+## Setup & Local Development
+
+1. **Clone the repository**
 ```bash
 npm install
 npx convex dev
