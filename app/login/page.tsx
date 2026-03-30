@@ -50,6 +50,14 @@ export default function LoginPage() {
     }
   }
 
+  function handleEnter(e: React.KeyboardEvent) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (loading) return;
+    if (otp.length !== OTP_LENGTH) return;
+    void handleVerifyCode();
+  }
+
   async function handleVerifyCode() {
     setLoading(true);
     setVerifyError(null);
@@ -130,6 +138,7 @@ export default function LoginPage() {
                       if (verifyError) setVerifyError(null);
                       setOtp(value);
                     }}
+                    onKeyDown={handleEnter}
                   >
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />

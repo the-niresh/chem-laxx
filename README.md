@@ -1,36 +1,146 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chemical Industry AI Decision Engine (B2B)
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Convex](https://img.shields.io/badge/Backend-Convex-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)
+![UI](https://img.shields.io/badge/UI-Tailwind%20%2B%20shadcn%2Fui-0ea5e9)
+![LLM](https://img.shields.io/badge/LLM-OpenAI-111827)
 
-First, run the development server:
+## Overview
+
+This repository contains a **B2B AI decision-making engine for the chemical industry**.
+
+It’s designed to reduce operational risk by **automating chemical selection/matching decisions** under strict safety, environmental, and operational constraints—minimizing human error in high-stakes workflows.
+
+Unlike a generic “chatbot”, the AI layer is implemented as a **constrained decision system**: prompts, output structure, and backend validation are engineered to produce **reliable, auditable recommendations** aligned with organizational policy.
+
+## Business Value
+
+- **Risk reduction**: consistent application of safety/operational constraints across decisions.
+- **Faster decision cycles**: reduces back-and-forth between operations, sales, and engineering.
+- **Repeatability**: improves standardization of recommendations across teams and shifts.
+- **Traceability**: conversations and outcomes are persisted and can be reviewed for QA.
+
+## Architecture
+
+### High-level components
+
+- **Next.js App Router (Frontend + Routing)**
+  - Human-facing workflow (login, conversation UI, history/sidebar, profile)
+  - UI is optimized for low-bloat, accessibility, and maintainability.
+
+- **Convex (Real-time backend + database + storage)**
+  - Type-safe queries/mutations powering:
+    - thread lifecycle (`threads`)
+    - message lifecycle (`messages`)
+    - user profile (`users`)
+    - avatar uploads (Convex storage)
+
+- **OpenAI (Decision logic)**
+  - Integrated through Convex actions / HTTP streaming endpoints.
+  - The LLM is treated as a *bounded reasoning engine* rather than an unconstrained assistant.
+
+### Data model (Convex)
+
+- **`users`**: identity + profile fields (`name`, `email`, `avatar_url`, `image` storage id)
+- **`threads`**: per-user decision sessions (title, timestamps)
+- **`messages`**: user/assistant/system messages; optionally streamed (`responseStreamId`)
+
+See: `convex/schema.ts`.
+
+## Deterministic / Safety-Constrained AI Integration
+
+The AI layer is engineered to produce **structured, decision-focused output** rather than free-form conversation.
+
+- **[Structured output contract]**
+  - The system prompt constrains responses into explicit sections (recommended solution, safety assessment, operational expectations, cost range, business impact, etc.).
+
+- **[Policy-driven behavior]**
+  - The prompt includes rules such as:
+    - avoid supplier-specific hallucinations
+    - state assumptions when data is missing
+    - prioritize decision confidence over verbosity
+
+- **[Validation & guardrails]**
+  - Convex acts as the authoritative compute boundary where:
+    - inputs are validated (Convex validators)
+    - outputs are persisted for review
+    - streaming is controlled and recoverable
+
+This approach makes the system suitable for production usage in regulated/high-risk operational contexts.
+
+## System Flow (How It Works)
+
+1. **User input (Next.js)**
+   - A user submits requirements/constraints via the chat UI.
+
+2. **Persist + orchestrate (Convex)**
+   - A mutation stores the message and associates it with a thread.
+   - The system triggers an LLM action/streaming path.
+
+3. **LLM decision step (OpenAI)**
+   - OpenAI is called with a strict system prompt to enforce a consistent decision format.
+   - For streaming use-cases, tokens are streamed and persisted.
+
+4. **Validated output + real-time sync (Convex → Next.js)**
+   - The assistant response is written back to Convex.
+   - UI updates automatically via Convex reactive queries.
+
+## Tech Stack
+
+- **Frontend**: Next.js 16 (App Router), React, TypeScript
+- **Backend / DB**: Convex (queries, mutations, actions, real-time sync)
+- **UI**: TailwindCSS + shadcn/ui + Radix primitives (accessible components, minimal bloat)
+- **AI**: OpenAI API
+
+## Key Features
+
+- **Safety-first decision support**
+  - Designed for chemical picking/matching decisions under strict constraints.
+
+- **Streaming responses (where applicable)**
+  - Token streaming with persistence for reliability and UX.
+
+- **Threaded decision history**
+  - Each session is stored as a thread with searchable history and lifecycle management.
+
+- **Profile management**
+  - Editable name, read-only email; avatar upload stored in Convex storage.
+
+- **Type-safe real-time backend**
+  - Convex validators and generated types provide a strongly-typed API boundary.
+
+## Security & Safety Notes
+
+- **Secrets management**
+  - OpenAI API key must be stored as a **Convex secret** (never committed).
+
+- **Authentication boundary**
+  - Backend mutations rely on authenticated user identity (`getAuthUserId`).
+
+- **Auditability**
+  - Decisions are stored in threads/messages, enabling post-hoc review and process improvements.
+
+## Repository Map
+
+- **`app/`**
+  - Next.js routing and UI composition
+- **`components/`**
+  - Dashboard UI, chat, navigation, reusable UI pieces
+- **`convex/`**
+  - Schema, queries/mutations/actions, OpenAI orchestration, streaming
+
+## Brief Setup (Development)
 
 ```bash
+npm install
+npx convex dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Environment requirements:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Set `OPENAI_API_KEY` as a Convex secret.
+- set `CONVEX_DEPLOYMENT` as a Convex Connector
+- set `NEXT_PUBLIC_CONVEX_URL` to the Convex URL
+- set `NEXT_PUBLIC_CONVEX_SITE_URL` to the Convex site URL
