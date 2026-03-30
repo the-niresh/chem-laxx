@@ -31,7 +31,7 @@ export const createThread = mutation({
 
 export const checkThreadExists = query({
   args: {
-    thread_id: v.any(),
+    thread_id: v.id("threads"),
   },
   returns: v.boolean(),
   handler: async (ctx, args) => {

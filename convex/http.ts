@@ -1,7 +1,6 @@
 import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 import { chatStream } from "./streaming";
-import { streamChatChat } from "./chat";
 import { httpAction } from "./_generated/server";
 
 
@@ -12,7 +11,7 @@ auth.addHttpRoutes(http);
 http.route({
   path: "/chat-stream",
   method: "POST",
-  handler: streamChatChat,
+  handler: chatStream,
 });
 
 http.route({
